@@ -1,9 +1,11 @@
 package net.samitkumar.spring_oauth2_resource_api;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -12,6 +14,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -22,6 +27,18 @@ public class SpringOauth2ResourceApiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringOauth2ResourceApiApplication.class, args);
+	}
+
+	@Bean
+	RouterFunction<ServerResponse> routes() {
+		return RouterFunctions.route()
+				.GET("/who-am-i", request -> ReactiveSecurityContextHolder
+						.getContext()
+						.map(SecurityContext::getAuthentication)
+						.map(this::toUser)
+						.flatMap(user -> ServerResponse.ok().bodyValue(user))
+						.switchIfEmpty(Mono.error(new ForbiddenException())))
+				.build();
 	}
 
 
@@ -40,10 +57,10 @@ public class SpringOauth2ResourceApiApplication {
 				.map(Jwt::getClaims)
 				.map(claims -> User.builder()
 						.userName(getValueAsString(claims.get("username")))
-						.customerCode(getValueAsString(claims.get("")))
+						.email(getValueAsString(claims.get("email")))
 						.roles(getValueAsList(claims.get("roles")))
 						.scope(getValueAsList(claims.get("scope")))
-						.personId(getValueAsString(claims.get("")))
+						.id(getValueAsString(claims.get("id")))
 						.build())
 				.orElseThrow();
 	}
@@ -75,17 +92,16 @@ class ForbiddenException extends RuntimeException {
 }
 
 @Builder
+@Data
 class User {
 	private List<String> roles;
 	private List<String> scope;
 	@ToString.Exclude
 	private String userName;
-	private String customerCode;
-	private List<String> customerCodes;
-	private String carrierCode;
-	private String personId;
+	private String id;
+	private String email;
 
-	public String rolesAsString() {
+	String rolesAsString() {
 		if (!CollectionUtils.isEmpty(roles)) {
 			return String.join(",", roles);
 		}
