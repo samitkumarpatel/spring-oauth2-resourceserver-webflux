@@ -1,4 +1,4 @@
-package net.samitkumar.spring_oauth2_resource_api;
+package net.samitkumar.spring_oauth2_resourceserver_webflux;
 
 import lombok.Builder;
 import lombok.Data;
