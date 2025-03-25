@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>net.samitkumar</groupId>
-	<artifactId>spring-oauth2-resource-api</artifactId>
+	<artifactId>spring-oauth2-resourceserver-webflux</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>spring-oauth2-resource-api</name>
-	<description>Springboot Oauth2 Resource Server api</description>
+	<description>Springboot Oauth2 Resource Server webflux</description>
 	<url/>
 	<licenses>
 		<license/>
